@@ -1,4 +1,3 @@
-import 'package:college_management/login/logi_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
