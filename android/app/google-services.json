@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "104378398183",
+    "project_id": "csmsserp",
+    "storage_bucket": "csmsserp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:104378398183:android:075ae905050c156edff942",
+        "android_client_info": {
+          "package_name": "com.example.college_management"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmksmktfit5F22ByVfKCln56NjvW7sit0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:104378398183:android:61d1b26c3fe11864dff942",
+        "android_client_info": {
+          "package_name": "com.example.csmsserp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmksmktfit5F22ByVfKCln56NjvW7sit0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
