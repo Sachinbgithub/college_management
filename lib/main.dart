@@ -1,12 +1,18 @@
+import 'dart:async';
+
 import 'package:college_management/student/student_hpage.dart';
+import 'package:college_management/utility/splashscreen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+
+import 'login/login_screen.dart';
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(StudentHomePage());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -22,7 +28,12 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: SplashScreenWrapper(),
+      routes:
+      {
+        '/home': (context) => StudentHomePage(),
+        '/login': (context) => LoginScreen(),
+      }
     );
   }
 }
@@ -44,26 +55,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
+              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
+           child: Column(
 
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -79,5 +77,34 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
 
     );
+  }
+}
+class SplashScreenWrapper extends StatefulWidget {
+
+  const SplashScreenWrapper(
+      {super.key});
+
+  @override
+  State<SplashScreenWrapper> createState() => _SplashScreenWrapperState();
+}
+
+class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    Timer(const Duration(seconds: 5), () {
+      FirebaseAuth.instance.authStateChanges().listen((User? user) {
+        if (user != null) {
+          Navigator.pushReplacementNamed(context, '/home');
+        } else {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const SplashScreen();
   }
 }

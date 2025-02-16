@@ -1,3 +1,4 @@
+import 'package:college_management/student/AttendanceScreen.dart';
 import 'package:college_management/student/student_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -49,7 +50,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> _screens = [
     HomeScreen(username: "User"),
-    AttendanceScreen(),
+    AttendanceScreen(studentId: '',),
     StudentProfile(),
     NotificationsScreen(),
     TimetableScreen(),
@@ -153,14 +154,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
-class AttendanceScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text('Attendance Screen'));
-  }
-}
-
 
 
 class NotificationsScreen extends StatelessWidget {

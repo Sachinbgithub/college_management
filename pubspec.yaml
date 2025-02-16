@@ -42,6 +42,8 @@ dependencies:
   firebase_core: ^3.11.0
   curved_navigation_bar: ^1.0.6
   animate_do: ^4.0.1
+  fl_chart: ^0.70.2
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:
@@ -69,6 +71,12 @@ flutter:
   assets:
     - assets/images/img1.png
     - assets/images/img2.png
+    - assets/profile/img.png
+    - assets/profile/img_1.png
+    - assets/profile/img_2.png
+    - assets/profile/img_3.png
+    - assets/profile/img_4.png
+    - assets/profile/img_5.png
 
 
 
