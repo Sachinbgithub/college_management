@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'NotificationsScreen.dart';
+import 'TimetableScreen.dart';
 
 class StudentHomePage extends StatelessWidget {
   @override
@@ -78,7 +80,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               title: Text("Profile"),
               onTap: () {
                 Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => StudentProfile()));
+                    context, MaterialPageRoute(builder: (context) => StudentProfile(studentId: '',)));
               },
             ),
             ListTile(
@@ -112,6 +114,8 @@ class HomeScreen extends StatelessWidget {
     'assets/images/img1.png',
   ];
 
+  get studentId => null;
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -140,14 +144,23 @@ class HomeScreen extends StatelessWidget {
           ),
           SizedBox(height: 40),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 30.0),
+            padding: EdgeInsets.symmetric(horizontal: 20.0),
             child: Column(
               children: [
-                _buildCard(context, Icons.assignment, "Attendance", () {}                ),
+                _buildCard(context, Icons.assignment, "Attendance", () {
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (context) => AttendanceScreen(studentId: '',)));
+                }),
                 SizedBox(height: 20),
-                _buildCard(context, Icons.schedule, "Timetable", () {}),
+                _buildCard(context, Icons.schedule, "Timetable", () {
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (context) => TimetableScreen()));
+                }),
                 SizedBox(height: 20),
-                _buildCard(context, Icons.notifications, "Notifications", () {}),
+                _buildCard(context, Icons.notifications, "Notifications", () {
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (context) => NotificationsScreen()));
+                }),
               ],
             ),
           ),
@@ -188,217 +201,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-
-
-// import 'package:flutter/material.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:carousel_slider/carousel_slider.dart';
-//
-// class StudentHomePage extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       home: DashboardScreen(),
-//     );
-//   }
-// }
-//
-// class DashboardScreen extends StatefulWidget {
-//   @override
-//   _DashboardScreenState createState() => _DashboardScreenState();
-// }
-//
-// class _DashboardScreenState extends State<DashboardScreen> {
-//   final FirebaseAuth _auth = FirebaseAuth.instance;
-//   String username = "User";
-//   int _currentIndex = 0;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     _fetchUsername();
-//   }
-//
-//   void _fetchUsername() async {
-//     User? user = _auth.currentUser;
-//     if (user != null) {
-//       DocumentSnapshot userDoc =
-//       await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-//       setState(() {
-//         username = userDoc['name'] ?? 'User';
-//       });
-//     }
-//   }
-//
-//   void _logout() async {
-//     await _auth.signOut();
-//     // TODO: Redirect user to login screen
-//   }
-//
-//   final List<Widget> _screens = [
-//     HomeScreen(username: "User"),
-//     AttendanceScreen(),
-//     ProfileScreen(),
-//     NotificationsScreen(),
-//     TimetableScreen(),
-//   ];
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text("Dashboard"),
-//         leading: IconButton(
-//           icon: Icon(Icons.menu),
-//           onPressed: () {},
-//         ),
-//         actions: [
-//           IconButton(
-//             icon: Icon(Icons.logout),
-//             onPressed: _logout,
-//           )
-//         ],
-//       ),
-//       body: Column(
-//         children: [
-//           Expanded(
-//             child: IndexedStack(
-//               index: _currentIndex,
-//               children: _screens.map((screen) {
-//                 if (screen is HomeScreen) {
-//                   return HomeScreen(username: username);
-//                 }
-//                 return screen;
-//               }).toList(),
-//             ),
-//           ),
-//         ],
-//       ),
-//       bottomNavigationBar: BottomNavigationBar(
-//         currentIndex: _currentIndex,
-//         onTap: (index) {
-//           setState(() {
-//             _currentIndex = index;
-//           });
-//         },
-//         items: [
-//           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-//           BottomNavigationBarItem(icon: Icon(Icons.check), label: "Attendance"),
-//           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-//           BottomNavigationBarItem(icon: Icon(Icons.notifications), label: "Notifications"),
-//           BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: "Timetable"),
-//         ],
-//       ),
-//     );
-//   }
-// }
-//
-// class HomeScreen extends StatelessWidget {
-//   final String username;
-//   HomeScreen({required this.username});
-//
-//   final List<String> imageList = [
-//     'assets/images/img1.png',
-//     'assets/images/img2.png',
-//     'assets/images/img1.png',
-//   ];
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return SingleChildScrollView(
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Padding(
-//             padding: EdgeInsets.all(16.0),
-//             child: Text(
-//               "Hello, $username",
-//               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-//             ),
-//           ),
-//           CarouselSlider(
-//             items: imageList.map((imagePath) {
-//               return ClipRRect(
-//                 borderRadius: BorderRadius.circular(15),
-//                 child: Image.asset(imagePath, fit: BoxFit.cover, width: double.infinity),
-//               );
-//             }).toList(),
-//             options: CarouselOptions(
-//               autoPlay: true,
-//               autoPlayInterval: Duration(seconds: 3),
-//               enlargeCenterPage: true,
-//             ),
-//           ),
-//           Padding(
-//             padding: EdgeInsets.all(8.0),
-//             child: Column(
-//               children: [
-//                 Container(
-//                   height: 100,
-//                   margin: EdgeInsets.all(8),
-//                   decoration: BoxDecoration(
-//                     color: Colors.red,
-//                     borderRadius: BorderRadius.circular(15),
-//                   ),
-//                 ),
-//                 Container(
-//                   height: 100,
-//                   margin: EdgeInsets.all(8),
-//                   decoration: BoxDecoration(
-//                     color: Colors.green,
-//                     borderRadius: BorderRadius.circular(15),
-//                   ),
-//                 ),
-//                 Container(
-//                   height: 100,
-//                   margin: EdgeInsets.all(8),
-//                   decoration: BoxDecoration(
-//                     color: Colors.blue,
-//                     borderRadius: BorderRadius.circular(15),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-//
-// class AttendanceScreen extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Center(child: Text('Attendance Screen'));
-//   }
-// }
-//
-// class ProfileScreen extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Center(child: Text('Profile Screen'));
-//   }
-// }
-//
-// class NotificationsScreen extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Center(child: Text('Notifications Screen'));
-//   }
-// }
-//
-// class TimetableScreen extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Center(child: Text('Timetable Screen'));
-//   }
-// }
-//

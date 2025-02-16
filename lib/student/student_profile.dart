@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class StudentProfile extends StatefulWidget {
-  const StudentProfile({super.key});
+  const StudentProfile({super.key, required String studentId});
 
   @override
   State<StudentProfile> createState() => _ProfilePageState();

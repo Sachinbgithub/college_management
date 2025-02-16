@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:college_management/student/student_hpage.dart';
 import 'package:college_management/utility/splashscreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
