@@ -46,6 +46,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void _logout() async {
     await _auth.signOut();
+      if (mounted) {
+        Navigator.pushNamedAndRemoveUntil(
+            context, '/login', (route) => false);
+    }
   }
 
   final List<Widget> _screens = [
@@ -65,11 +69,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
           icon: Icon(Icons.menu),
           onPressed: () {},
         ),
-        actions: [
+          actions: [
           IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: _logout,
-          )
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              if (mounted) {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/login', (route) => false);
+              }
+            },
+          ),
         ],
       ),
       body: IndexedStack(

@@ -1,11 +1,10 @@
-// lib/screens/register_screen.dart
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+// import '../models/user_type.dart';
+import 'auth_service.dart'; // Import UserType
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({Key? key}) : super(key: key);
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -19,6 +18,63 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _enrollmentController = TextEditingController();
   UserType _selectedUserType = UserType.student;
   bool _isLoading = false;
+  bool _obscurePassword = true; // For password visibility toggle
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _enrollmentController.dispose();
+    super.dispose();
+  }
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _obscurePassword = !_obscurePassword;
+    });
+  }
+
+  Future<void> _handleRegister() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() => _isLoading = true);
+
+      try {
+        // Directly use FirebaseAuth for registration
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
+
+        // Registration successful
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Registration successful!")),
+        );
+        Navigator.pushReplacementNamed(context, '/home');
+      } on FirebaseAuthException catch (e) {
+        // Handle Firebase Auth exceptions
+        setState(() => _isLoading = false);
+        String errorMessage = "Registration failed.";
+        if (e.code == 'weak-password') {
+          errorMessage = 'The password provided is too weak.';
+        } else if (e.code == 'email-already-in-use') {
+          errorMessage = 'The account already exists for that email.';
+        } else {
+          errorMessage = e.message ?? "An error occurred.";
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      } catch (e) {
+        // Handle other exceptions
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("An error occurred: ${e.toString()}")),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +85,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Full Name'),
+                decoration: const InputDecoration(
+                  labelText: 'Full Name',
+                  border: OutlineInputBorder(),
+                ),
                 validator: (value) {
                   if (value?.isEmpty ?? true) {
                     return 'Please enter your name';
@@ -43,19 +103,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                ),
                 validator: (value) {
                   if (value?.isEmpty ?? true) {
                     return 'Please enter email';
                   }
+                  // You can add more email validation here if needed
                   return null;
                 },
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Password'),
-                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscurePassword
+                        ? Icons.visibility_off
+                        : Icons.visibility),
+                    onPressed: _togglePasswordVisibility,
+                  ),
+                ),
+                obscureText: _obscurePassword,
                 validator: (value) {
                   if (value?.isEmpty ?? true) {
                     return 'Please enter password';
@@ -80,6 +153,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 },
                 decoration: const InputDecoration(
                   labelText: 'User Type',
+                  border: OutlineInputBorder(),
                 ),
               ),
               if (_selectedUserType == UserType.student) ...[
@@ -88,6 +162,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _enrollmentController,
                   decoration: const InputDecoration(
                     labelText: 'Enrollment Number',
+                    border: OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (_selectedUserType == UserType.student &&
@@ -99,52 +174,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ],
               const SizedBox(height: 24),
-              if (_isLoading)
-                const CircularProgressIndicator()
-              else
-                ElevatedButton(
-                  onPressed: _handleRegister,
-                  child: const Text('Register'),
+              ElevatedButton(
+                onPressed: _isLoading ? null : _handleRegister,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(
+                  color: Colors.white,
+                )
+                    : const Text('Register'),
+              ),
             ],
           ),
         ),
       ),
     );
-  }
-
-  Future<void> _handleRegister() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      setState(() => _isLoading = true);
-
-      final result = await context.read<AuthService>().registerUser(
-        email: _emailController.text,
-        password: _passwordController.text,
-        name: _nameController.text,
-        userType: _selectedUserType,
-        enrollmentNumber: _selectedUserType == UserType.student
-            ? _enrollmentController.text
-            : null,
-      );
-
-      setState(() => _isLoading = false);
-
-      if (result != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result)),
-        );
-      } else if (mounted) {
-        Navigator.pop(context);
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _enrollmentController.dispose();
-    super.dispose();
   }
 }
