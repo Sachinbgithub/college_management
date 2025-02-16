@@ -1,5 +1,8 @@
+import 'package:college_management/staff/notification.dart';
+import 'package:college_management/staff/staffHome.dart';
 import 'package:college_management/student/AttendanceScreen.dart';
 import 'package:college_management/student/student_profile.dart';
+import 'package:college_management/student/timetablePage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -43,12 +46,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  void _logout() async {
-    await _auth.signOut();
-    if (mounted) {
-      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-    }
-  }
+  // void _logout() async {
+  //   await FirebaseAuth.instance.signOut();
+  //   if (mounted) {
+  //     Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +61,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: _logout,
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              if (mounted) {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/login', (route) => false);
+              }
+            },
           ),
         ],
       ),
@@ -84,6 +93,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             ListTile(
+              leading: Icon(Icons.person),
+              title: Text("staff"),
+              onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => staffHome()));
+              },
+            ),
+            ListTile(
               leading: Icon(Icons.check),
               title: Text("Attendance"),
               onTap: () {
@@ -94,7 +111,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ListTile(
               leading: Icon(Icons.logout),
               title: Text("Logout"),
-              onTap: _logout,
+              onTap:
+                    () async {
+                  await FirebaseAuth.instance.signOut();
+                  if (mounted) {
+                    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                  }
+                }
             ),
           ],
         ),
@@ -154,12 +177,12 @@ class HomeScreen extends StatelessWidget {
                 SizedBox(height: 20),
                 _buildCard(context, Icons.schedule, "Timetable", () {
                   Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => TimetableScreen()));
+                      context, MaterialPageRoute(builder: (context) => TimetablePage()));
                 }),
                 SizedBox(height: 20),
                 _buildCard(context, Icons.notifications, "Notifications", () {
                   Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => NotificationsScreen()));
+                      context, MaterialPageRoute(builder: (context) => NotificationsPage()));
                 }),
               ],
             ),

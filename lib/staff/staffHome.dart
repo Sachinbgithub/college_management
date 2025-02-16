@@ -7,6 +7,10 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:animate_do/animate_do.dart';
 
+import '../student/timetablePage.dart';
+import 'attendance.dart';
+import 'notification.dart';
+
 class staffHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -54,10 +58,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> _screens = [
     HomeScreen(username: "User"),
-    AttendanceScreen(studentId: '',),
-    StudentProfile(),
-    NotificationsScreen(),
-    TimetableScreen(),
+    AttendancePage(),
+    // AttendanceScreen(studentId: '',),
+    StudentProfile(studentId: '',),
+    NotificationsPage(),
+    TimetablePage(),
   ];
 
   @override
@@ -164,20 +169,4 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
-
-class NotificationsScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text('Notifications Screen'));
-  }
-}
-
-class TimetableScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text('Timetable Screen'));
-  }
-}
-
 
