@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:animate_do/animate_do.dart';
 
 class StudentHomePage extends StatelessWidget {
   @override
@@ -25,7 +23,6 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String username = "User";
-  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -46,80 +43,62 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void _logout() async {
     await _auth.signOut();
-      if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(
-            context, '/login', (route) => false);
+    if (mounted) {
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
     }
   }
-
-  final List<Widget> _screens = [
-    HomeScreen(username: "User"),
-    AttendanceScreen(studentId: '',),
-    StudentProfile(),
-    NotificationsScreen(),
-    TimetableScreen(),
-  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Dashboard"),
-        leading: IconButton(
-          icon: Icon(Icons.menu),
-          onPressed: () {},
-        ),
-          actions: [
+        actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              if (mounted) {
-                Navigator.pushNamedAndRemoveUntil(
-                    context, '/login', (route) => false);
-              }
-            },
+            onPressed: _logout,
           ),
         ],
       ),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens.map((screen) {
-          if (screen is HomeScreen) {
-            return HomeScreen(username: username);
-          }
-          return screen;
-        }).toList(),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text(
+                'Welcome, $username',
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text("Profile"),
+              onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => StudentProfile()));
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.check),
+              title: Text("Attendance"),
+              onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => AttendanceScreen(studentId: '',)));
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text("Logout"),
+              onTap: _logout,
+            ),
+          ],
+        ),
       ),
-      bottomNavigationBar: CurvedNavigationBar(
-        backgroundColor: Colors.white,
-        color: Colors.grey.shade300,
-        buttonBackgroundColor: Colors.white,
-        height: 60,
-        animationDuration: Duration(milliseconds: 300),
-        items: [
-          _buildNavItem(Icons.home, 0),
-          _buildNavItem(Icons.check, 1),
-          _buildNavItem(Icons.person, 2),
-          _buildNavItem(Icons.notifications, 3),
-          _buildNavItem(Icons.calendar_today, 4),
-        ],
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-      ),
+      body: HomeScreen(username: username),
     );
-  }
-
-  Widget _buildNavItem(IconData icon, int index) {
-    return _currentIndex == index
-        ? Bounce(
-      duration: Duration(milliseconds: 300),
-      child: Icon(icon, size: 35, color: Colors.black),
-    )
-        : Icon(icon, size: 30, color: Colors.grey);
   }
 }
 
@@ -159,26 +138,60 @@ class HomeScreen extends StatelessWidget {
               enlargeCenterPage: true,
             ),
           ),
+          SizedBox(height: 40),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 30.0),
+            child: Column(
+              children: [
+                _buildCard(context, Icons.assignment, "Attendance", () {}                ),
+                SizedBox(height: 20),
+                _buildCard(context, Icons.schedule, "Timetable", () {}),
+                SizedBox(height: 20),
+                _buildCard(context, Icons.notifications, "Notifications", () {}),
+              ],
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCard(BuildContext context, IconData icon, String title, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.blue.shade100,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.shade300,
+              blurRadius: 5,
+              spreadRadius: 2,
+              offset: Offset(2, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Icon(icon, size: 30, color: Colors.blue.shade700),
+            SizedBox(width: 15),
+            Text(
+              title,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 
-class NotificationsScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text('Notifications Screen'));
-  }
-}
 
-class TimetableScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text('Timetable Screen'));
-  }
-}
+
 
 
 
