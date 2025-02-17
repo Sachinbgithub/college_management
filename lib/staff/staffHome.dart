@@ -69,7 +69,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Dashboard"),
+        title: Text("Staff Dashboard"),
         leading: IconButton(
           icon: Icon(Icons.menu),
           onPressed: () {},

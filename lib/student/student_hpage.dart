@@ -7,8 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'NotificationsScreen.dart';
-import 'TimetableScreen.dart';
 
 class StudentHomePage extends StatelessWidget {
   @override
@@ -17,7 +15,10 @@ class StudentHomePage extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: DashboardScreen(),
     );
+
+
   }
+
 }
 
 class DashboardScreen extends StatefulWidget {
