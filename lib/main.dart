@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:college_management/admin/ad_home.dart';
+import 'package:college_management/admin/notify.dart';
 import 'package:college_management/student/student_hpage.dart';
 import 'package:college_management/utility/splashscreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,7 +29,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: SplashScreenWrapper(),
+      home: AdminPanel(),
+        // SplashScreenWrapper()
       routes:
       {
         '/home': (context) => StudentHomePage(),
