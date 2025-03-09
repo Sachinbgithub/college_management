@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class AttendancePage extends StatefulWidget {
@@ -116,7 +115,7 @@ class AttendanceDataPage extends StatelessWidget {
   final Map<String, Map<DateTime, bool>> attendanceRecords;
   final List<Student> students;
 
-  AttendanceDataPage({required this.attendanceRecords, required this.students});
+  const AttendanceDataPage({super.key, required this.attendanceRecords, required this.students});
 
   @override
   Widget build(BuildContext context) {

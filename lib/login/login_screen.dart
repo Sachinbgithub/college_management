@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'auth_service.dart';
 
 class LoginScreen2 extends StatefulWidget {
-  const LoginScreen2({Key? key}) : super(key: key);
+  const LoginScreen2({super.key});
 
   @override
   State<LoginScreen2> createState() => _LoginScreen2State();

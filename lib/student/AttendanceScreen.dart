@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AttendanceScreen extends StatefulWidget {
   final String studentId;
-  AttendanceScreen({required this.studentId});
+  const AttendanceScreen({super.key, required this.studentId});
 
   @override
   _AttendanceScreenState createState() => _AttendanceScreenState();
@@ -98,13 +98,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           PieChartSectionData(
             color: Colors.green,
             value: presentCount.toDouble(),
-            title: '${presentCount}%',
+            title: '$presentCount%',
             radius: 50,
           ),
           PieChartSectionData(
             color: Colors.red,
             value: absentCount.toDouble(),
-            title: '${absentCount}%',
+            title: '$absentCount%',
             radius: 50,
           ),
         ],

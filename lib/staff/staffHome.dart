@@ -1,4 +1,3 @@
-import 'package:college_management/student/AttendanceScreen.dart';
 import 'package:college_management/student/student_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,22 +7,12 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:animate_do/animate_do.dart';
 
 import '../student/timetablePage.dart';
-import 'attendance.dart';
 import 'mark_attendance.dart';
 import 'notification.dart';
 
-class staffHome extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home:
-      DashboardScreen(),
-    );
-  }
-}
-
 class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({super.key});
+
   @override
   _DashboardScreenState createState() => _DashboardScreenState();
 }
@@ -60,9 +49,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> _screens = [
     HomeScreen(username: "User"),
-    // AttendancePage()
     FacultyViewScreen(),
-    // AttendanceScreen(studentId: '',),
     StudentProfile(studentId: '',),
     NotificationsPage(),
     TimetablePage(),
@@ -133,7 +120,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
 class HomeScreen extends StatelessWidget {
   final String username;
-  HomeScreen({required this.username});
+  HomeScreen({super.key, required this.username});
 
   final List<String> imageList = [
     'assets/images/img1.png',

@@ -1,16 +1,13 @@
 import 'dart:async';
 import 'package:college_management/admin/ad_home.dart';
-import 'package:college_management/admin/notify.dart';
 import 'package:college_management/staff/staffHome.dart';
-import 'package:college_management/student/student_hpage.dart';
+import 'package:college_management/student/student_homepage.dart';
 import 'package:college_management/utility/splashscreen.dart';
-import 'package:college_management/utility/temp.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'login/login_screen.dart';
 import 'login/register_screen.dart';
-// import 'login/temp.dart';
 
 
 void main() async {
@@ -26,6 +23,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
 
@@ -33,13 +31,12 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home:
-      // AdminPanel(),
         SplashScreenWrapper(),
       routes:
       {
         '/admin_dashboard': (context) => AdminPanel(),
-        '/faculty_dashboard': (context) => staffHome(),
-        '/home': (context) => StudentHomePage(),
+        '/faculty_dashboard': (context) => DashboardScreen(),
+        '/home': (context) => StudentDashboard(),
         '/login': (context) => LoginScreen2(),
         '/register': (context) => RegisterScreen2(),
       }
@@ -57,7 +54,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  final int _counter = 0;
 
 
 

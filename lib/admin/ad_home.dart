@@ -5,6 +5,8 @@ import 'faculty_verify.dart';
 import 'notify.dart';
 
 class AdminPanel extends StatefulWidget {
+  const AdminPanel({super.key});
+
   @override
   _AdminPanelState createState() => _AdminPanelState();
 }
@@ -116,5 +118,3 @@ class _AdminPanelState extends State<AdminPanel> {
     );
   }
 }
-
-

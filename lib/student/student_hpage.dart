@@ -1,5 +1,4 @@
 import 'package:college_management/staff/notification.dart';
-import 'package:college_management/staff/staffHome.dart';
 import 'package:college_management/student/AttendanceScreen.dart';
 import 'package:college_management/student/student_profile.dart';
 import 'package:college_management/student/timetablePage.dart';
@@ -9,6 +8,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
 class StudentHomePage extends StatefulWidget {
+  const StudentHomePage({super.key});
+
   @override
   _StudentHomePageState createState() => _StudentHomePageState();
 }
@@ -81,14 +82,6 @@ class _StudentHomePageState extends State<StudentHomePage> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.person),
-              title: Text("staff"),
-              onTap: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => staffHome()));
-              },
-            ),
-            ListTile(
               leading: Icon(Icons.check),
               title: Text("Attendance"),
               onTap: () {
@@ -117,7 +110,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
 
 class HomeScreen extends StatelessWidget {
   final String username;
-  HomeScreen({required this.username});
+  HomeScreen({super.key, required this.username});
 
   final List<String> imageList = [
     'assets/images/img1.png',

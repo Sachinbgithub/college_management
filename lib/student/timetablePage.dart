@@ -70,6 +70,8 @@ class TimetablePage extends StatelessWidget {
     ),
   ];
 
+  TimetablePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

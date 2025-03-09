@@ -1,12 +1,10 @@
-import 'package:flutter/cupertino.dart';
 
-import 'package:college_management/utility/temp.dart';
 import 'package:flutter/material.dart';
 
 import '../login/auth_service.dart';
 
 class FacultyApprovalScreen extends StatefulWidget {
-  const FacultyApprovalScreen({Key? key}) : super(key: key);
+  const FacultyApprovalScreen({super.key});
 
   @override
   State<FacultyApprovalScreen> createState() => _FacultyApprovalScreenState();
@@ -100,8 +98,8 @@ class _FacultyApprovalScreenState extends State<FacultyApprovalScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _loadPendingFaculty,
-        child: const Icon(Icons.refresh),
         tooltip: 'Refresh',
+        child: const Icon(Icons.refresh),
       ),
     );
   }

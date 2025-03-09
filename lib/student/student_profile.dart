@@ -11,9 +11,9 @@ class StudentProfile extends StatefulWidget {
 
 class _ProfilePageState extends State<StudentProfile> {
   final TextEditingController _nameController = TextEditingController();
-  bool _isEditing = false;
-  bool _isLoading = false;
-  int _selectedProfileIndex = 0;
+  final bool _isEditing = false;
+  final bool _isLoading = false;
+  final int _selectedProfileIndex = 0;
 
   final List<String> profilePictures = [
     'assets/profile/img.png',

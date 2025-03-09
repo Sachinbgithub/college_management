@@ -43,6 +43,8 @@ class NotificationsPage extends StatelessWidget {
     ),
   ];
 
+  NotificationsPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     // Sort notifications by timestamp in descending order (most recent first)

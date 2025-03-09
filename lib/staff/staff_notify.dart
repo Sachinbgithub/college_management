@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class TeacherMessageScreen extends StatelessWidget {
   final List<String> messages;
-  TeacherMessageScreen({required this.messages});
+  const TeacherMessageScreen({super.key, required this.messages});
 
   @override
   Widget build(BuildContext context) {

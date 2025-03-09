@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ManageUsersScreen extends StatefulWidget {
+  const ManageUsersScreen({super.key});
+
   @override
   _ManageUsersScreenState createState() => _ManageUsersScreenState();
 }
@@ -130,8 +131,8 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
                   SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: _addUser,
-                    child: Text("Add User"),
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                    child: Text("Add User"),
                   ),
                 ],
               ),
