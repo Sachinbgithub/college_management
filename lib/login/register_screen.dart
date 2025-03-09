@@ -3,14 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 // import '../models/user_type.dart';
 import 'auth_service.dart'; // Import UserType
 
-class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+class RegisterScreen2 extends StatefulWidget {
+  const RegisterScreen2({Key? key}) : super(key: key);
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  State<RegisterScreen2> createState() => _RegisterScreen2State();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterScreen2State extends State<RegisterScreen2> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -19,6 +19,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   UserType _selectedUserType = UserType.student;
   bool _isLoading = false;
   bool _obscurePassword = true; // For password visibility toggle
+
+  late AuthService _authService;
+
+  @override
+  void initState() {
+    super.initState();
+    _authService = AuthService();
+  }
 
   @override
   void dispose() {
@@ -38,34 +46,86 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _handleRegister() async {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() => _isLoading = true);
+      // Add this to your RegisterScreen when handling admin registration
+// This could be in the _handleRegister method before calling registerUser
+
+// Optional: Add admin registration security
+      if (_selectedUserType == UserType.admin) {
+        // You could require an admin code or limit admin registration
+        // For example:
+        String adminCode = "431002"; // Set this to something secure
+
+        // Show dialog to enter admin code
+        String? enteredCode = await showDialog<String>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Admin Verification'),
+            content: TextField(
+              decoration: const InputDecoration(
+                labelText: 'Enter Admin Code',
+              ),
+              obscureText: true,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  String code = (context.findAncestorWidgetOfExactType<AlertDialog>()?.content as TextField).controller?.text ?? '';
+                  Navigator.pop(context, code);
+                },
+                child: const Text('Verify'),
+              ),
+            ],
+          ),
+        );
+
+        if (enteredCode != adminCode) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Invalid admin code')),
+          );
+          return; // Stop the registration process
+        }
+      }
 
       try {
-        // Directly use FirebaseAuth for registration
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        // Use AuthService for registration instead of direct Firebase call
+        String? error = await _authService.registerUser(
           email: _emailController.text,
           password: _passwordController.text,
+          name: _nameController.text,
+          userType: _selectedUserType,
+          enrollmentNumber: _selectedUserType == UserType.student ? _enrollmentController.text : null,
         );
 
-        // Registration successful
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Registration successful!")),
-        );
-        Navigator.pushReplacementNamed(context, '/home');
-      } on FirebaseAuthException catch (e) {
-        // Handle Firebase Auth exceptions
-        setState(() => _isLoading = false);
-        String errorMessage = "Registration failed.";
-        if (e.code == 'weak-password') {
-          errorMessage = 'The password provided is too weak.';
-        } else if (e.code == 'email-already-in-use') {
-          errorMessage = 'The account already exists for that email.';
+
+        if (error != null) {
+          // Show error message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(error)),
+          );
         } else {
-          errorMessage = e.message ?? "An error occurred.";
+          // Registration successful, redirect based on user type
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Registration successful!")),
+          );
+
+          if (_selectedUserType == UserType.faculty) {
+            // For faculty, show pending approval message and redirect to login
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Your account is pending approval. Please contact administrator.")),
+            );
+            Navigator.pushReplacementNamed(context, '/login');
+          } else {
+            // For others, redirect to appropriate dashboard
+            String dashboardRoute = _authService.getDashboardRoute();
+            Navigator.pushReplacementNamed(context, dashboardRoute);
+          }
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage)),
-        );
       } catch (e) {
         // Handle other exceptions
         setState(() => _isLoading = false);

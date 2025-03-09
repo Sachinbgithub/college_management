@@ -9,6 +9,7 @@ import 'package:animate_do/animate_do.dart';
 
 import '../student/timetablePage.dart';
 import 'attendance.dart';
+import 'mark_attendance.dart';
 import 'notification.dart';
 
 class staffHome extends StatelessWidget {
@@ -16,7 +17,8 @@ class staffHome extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: DashboardScreen(),
+      home:
+      DashboardScreen(),
     );
   }
 }
@@ -58,7 +60,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> _screens = [
     HomeScreen(username: "User"),
-    AttendancePage(),
+    // AttendancePage()
+    FacultyViewScreen(),
     // AttendanceScreen(studentId: '',),
     StudentProfile(studentId: '',),
     NotificationsPage(),

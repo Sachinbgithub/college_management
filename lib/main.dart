@@ -1,13 +1,16 @@
 import 'dart:async';
 import 'package:college_management/admin/ad_home.dart';
 import 'package:college_management/admin/notify.dart';
+import 'package:college_management/staff/staffHome.dart';
 import 'package:college_management/student/student_hpage.dart';
 import 'package:college_management/utility/splashscreen.dart';
+import 'package:college_management/utility/temp.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-
 import 'login/login_screen.dart';
+import 'login/register_screen.dart';
+// import 'login/temp.dart';
 
 
 void main() async {
@@ -29,12 +32,16 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: AdminPanel(),
-        // SplashScreenWrapper()
+      home:
+      // AdminPanel(),
+        SplashScreenWrapper(),
       routes:
       {
+        '/admin_dashboard': (context) => AdminPanel(),
+        '/faculty_dashboard': (context) => staffHome(),
         '/home': (context) => StudentHomePage(),
-        '/login': (context) => LoginScreen(),
+        '/login': (context) => LoginScreen2(),
+        '/register': (context) => RegisterScreen2(),
       }
     );
   }
@@ -42,7 +49,6 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
 
   final String title;
 

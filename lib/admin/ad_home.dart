@@ -1,5 +1,7 @@
 import 'package:college_management/admin/manage_user.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'faculty_verify.dart';
 import 'notify.dart';
 
 class AdminPanel extends StatefulWidget {
@@ -26,7 +28,21 @@ class _AdminPanelState extends State<AdminPanel> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Admin Panel")),
+      appBar: AppBar(title: Text("Admin Panel"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              if (mounted) {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/login', (route) => false);
+              }
+            },
+          ),
+        ],
+      ),
+
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -50,6 +66,11 @@ class _AdminPanelState extends State<AdminPanel> {
               title: Text("Send Notification"),
               onTap: () => _navigateToScreen(context, AdminMessageScreen()),
             ),
+            ListTile(
+              leading: Icon(Icons.notifications),
+              title: Text("Pending faculty verification"),
+              onTap: () => _navigateToScreen(context, FacultyApprovalScreen()),
+            ),
           ],
         ),
       ),
@@ -63,6 +84,8 @@ class _AdminPanelState extends State<AdminPanel> {
             _animatedButton(context, "Send Message", Icons.message, Colors.green, AdminMessageScreen()),
             SizedBox(height: 20),
             _animatedButton(context, "Send Notification", Icons.notifications, Colors.orange, AdminMessageScreen()),
+            SizedBox(height: 20),
+            _animatedButton(context, "Pending faculty verification", Icons.notifications, Colors.grey, FacultyApprovalScreen()),
           ],
         ),
       ),

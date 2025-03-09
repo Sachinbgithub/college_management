@@ -87,6 +87,71 @@ class AuthService with ChangeNotifier {
     }
     return 'Login failed';
   }
+  // Add this method to your AuthService class
+  Future<List<Map<String, dynamic>>> getPendingFacultyAccounts() async {
+    try {
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('users')
+          .where('userType', isEqualTo: 'faculty')
+          .where('profileStatus', isEqualTo: 'pending')
+          .get();
+
+      List<Map<String, dynamic>> facultyList = [];
+      for (var doc in querySnapshot.docs) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        facultyList.add({
+          'id': doc.id,
+          'name': data['name'],
+          'email': data['email'],
+          'createdAt': data['createdAt'],
+        });
+      }
+      return facultyList;
+    } catch (e) {
+      print('Error getting pending faculty accounts: $e');
+      return [];
+    }
+  }
+
+// Add this method to approve a faculty account
+  Future<bool> approveFacultyAccount(String userId) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'profileStatus': 'active',
+      });
+      return true;
+    } catch (e) {
+      print('Error approving faculty account: $e');
+      return false;
+    }
+  }
+
+// Add this method to reject a faculty account (optional)
+  Future<bool> rejectFacultyAccount(String userId) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'profileStatus': 'rejected',
+      });
+      return true;
+    } catch (e) {
+      print('Error rejecting faculty account: $e');
+      return false;
+    }
+  }
+
+  // Get the dashboard route based on user type
+  String getDashboardRoute() {
+    switch (_userType) {
+      case UserType.admin:
+        return '/admin_dashboard';
+      case UserType.faculty:
+        return '/faculty_dashboard';
+      case UserType.student:
+        return '/home';
+      default:
+        return '/home'; // Fallback route
+    }
+  }
 
   Future<void> logout() async {
     await _auth.signOut();
@@ -113,5 +178,7 @@ class AuthService with ChangeNotifier {
     notifyListeners();
   }
 
-  signOut() {}
+  Future<void> signOut() async {
+    await logout();
+  }
 }

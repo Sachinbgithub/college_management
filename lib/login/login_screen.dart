@@ -1,20 +1,29 @@
-// import 'package:college_management/screens/register_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+// lib/services/auth_service.dart
 import 'package:flutter/material.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+import 'auth_service.dart';
+
+class LoginScreen2 extends StatefulWidget {
+  const LoginScreen2({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<LoginScreen2> createState() => _LoginScreen2State();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreen2State extends State<LoginScreen2> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
+
+  late AuthService _authService;
+
+  @override
+  void initState() {
+    super.initState();
+    _authService = AuthService();
+  }
 
   @override
   void dispose() {
@@ -34,32 +43,29 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _isLoading = true);
 
       try {
-        // Directly use FirebaseAuth for login
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _emailController.text,
-          password: _passwordController.text,
+        // Use AuthService for login instead of direct Firebase call
+        String? error = await _authService.login(
+          _emailController.text,
+          _passwordController.text,
         );
 
-        // Login successful
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Login successful!")),
-        );
-        Navigator.pushReplacementNamed(context, '/home');
-      } on FirebaseAuthException catch (e) {
-        // Handle Firebase Auth exceptions
-        setState(() => _isLoading = false);
-        String errorMessage = "Login failed.";
-        if (e.code == 'user-not-found') {
-          errorMessage = 'No user found for that email.';
-        } else if (e.code == 'wrong-password') {
-          errorMessage = 'Wrong password provided for that user.';
+
+        if (error != null) {
+          // Show error message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(error)),
+          );
         } else {
-          errorMessage = e.message ?? "An error occurred.";
+          // Login successful, redirect based on user type
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Login successful!")),
+          );
+
+          // Get the appropriate dashboard route based on user type
+          String dashboardRoute = _authService.getDashboardRoute();
+          Navigator.pushReplacementNamed(context, dashboardRoute);
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage)),
-        );
       } catch (e) {
         // Handle other exceptions
         setState(() => _isLoading = false);
