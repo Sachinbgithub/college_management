@@ -1,3 +1,4 @@
+import 'package:college_management/staff/view_attendance.dart';
 import 'package:college_management/student/student_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -5,7 +6,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:animate_do/animate_do.dart';
-
 import '../student/timetablePage.dart';
 import 'mark_attendance.dart';
 import 'notification.dart';
@@ -49,7 +49,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> _screens = [
     HomeScreen(username: "User"),
-    FacultyViewScreen(),
+    AttendancePage(),
     StudentProfile(studentId: '',),
     NotificationsPage(),
     TimetablePage(),
@@ -154,6 +154,15 @@ class HomeScreen extends StatelessWidget {
               enlargeCenterPage: true,
             ),
           ),
+          ElevatedButton(
+    onPressed: () {
+    Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => ViewAttendancePage()),
+    );
+    }, child: Text("View attendance"),
+              // onPressed: (){Navigator.push(context, ViewAttendancePage(),);}, child: Text("view attendance")
+    )
         ],
       ),
     );

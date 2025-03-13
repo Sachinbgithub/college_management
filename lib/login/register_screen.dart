@@ -96,51 +96,6 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
         // Proceed with admin registration
         // Your admin registration logic goes here
       }
-//
-//       // Add this to your RegisterScreen when handling admin registration
-// // This could be in the _handleRegister method before calling registerUser
-//
-// // Optional: Add admin registration security
-//       if (_selectedUserType == UserType.admin) {
-//         // You could require an admin code or limit admin registration
-//         // For example:
-//         String adminCode = "431002"; // Set this to something secure
-//
-//         // Show dialog to enter admin code
-//         String? enteredCode = await showDialog<String>(
-//           context: context,
-//           builder: (context) => AlertDialog(
-//             title: const Text('Admin Verification'),
-//             content: TextField(
-//               decoration: const InputDecoration(
-//                 labelText: 'Enter Admin Code',
-//               ),
-//               obscureText: true,
-//             ),
-//             actions: [
-//               TextButton(
-//                 onPressed: () => Navigator.pop(context),
-//                 child: const Text('Cancel'),
-//               ),
-//               TextButton(
-//                 onPressed: () {
-//                   String code = (context.findAncestorWidgetOfExactType<AlertDialog>()?.content as TextField).controller?.text ?? '';
-//                   Navigator.pop(context);
-//                 },
-//                 child: const Text('Verify'),
-//               ),
-//             ],
-//           ),
-//         );
-//
-//         if (enteredCode != adminCode) {
-//           setState(() => _isLoading = false);
-//           ScaffoldMessenger.of(context).showSnackBar(
-//             const SnackBar(content: Text('Invalid admin code')),
-//           );
-//           return; // Stop the registration process
-//         }
-//       }
 
       try {
         // Use AuthService for registration instead of direct Firebase call
