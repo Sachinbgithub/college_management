@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:college_management/admin/ad_home.dart';
-import 'package:college_management/staff/staffHome.dart';
 import 'package:college_management/staff/test2.dart';
 import 'package:college_management/student/student_homepage.dart';
 import 'package:college_management/utility/splashscreen.dart';

@@ -16,38 +16,39 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Notifications"),
+        title: const Text("Notifications"),
         backgroundColor: Colors.blue.shade700,
       ),
       body: StreamBuilder(
         stream: _firestore.collection("notifications").orderBy("timestamp", descending: true).snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
           }
-
-          var notifications = snapshot.data!.docs;
-
-          if (notifications.isEmpty) {
-            return Center(
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(
               child: Text("No notifications yet!", style: TextStyle(fontSize: 18, color: Colors.grey)),
             );
           }
+
+          var notifications = snapshot.data!.docs;
 
           return ListView.builder(
             itemCount: notifications.length,
             itemBuilder: (context, index) {
               var notification = notifications[index];
-              bool isRead = notification["isRead"] ?? false;
+
+              // ✅ FIX: Check if "isRead" exists, otherwise default to false
+              bool isRead = notification.data().toString().contains("isRead") ? notification["isRead"] : false;
 
               return Dismissible(
                 key: Key(notification.id),
                 direction: DismissDirection.endToStart,
                 background: Container(
                   alignment: Alignment.centerRight,
-                  padding: EdgeInsets.only(right: 20),
+                  padding: const EdgeInsets.only(right: 20),
                   color: Colors.red,
-                  child: Icon(Icons.delete, color: Colors.white),
+                  child: const Icon(Icons.delete, color: Colors.white),
                 ),
                 onDismissed: (direction) {
                   _firestore.collection("notifications").doc(notification.id).delete();
@@ -56,13 +57,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   tileColor: isRead ? Colors.white : Colors.blue.shade50,
                   leading: CircleAvatar(
                     backgroundColor: Colors.blue.shade700,
-                    child: Icon(Icons.notifications, color: Colors.white),
+                    child: const Icon(Icons.notifications, color: Colors.white),
                   ),
-                  title: Text(notification["title"], style: TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(notification["title"], style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text(notification["message"]),
                   trailing: Text(
                     _formatTimestamp(notification["timestamp"]),
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
                   ),
                   onTap: () {
                     _markAsRead(notification.id);
@@ -85,4 +86,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     _firestore.collection("notifications").doc(docId).update({"isRead": true});
   }
 }
+
+
 

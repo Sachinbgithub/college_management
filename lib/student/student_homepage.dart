@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
+import '../staff/view_timetable.dart';
+
 
 class StudentDashboard extends StatefulWidget {
   const StudentDashboard({super.key});
@@ -221,7 +223,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
     final List<Widget> pages = [
       _buildHomeTab(),
       _buildProfileTab(),
-      _buildTimetableTab(),
+      StudentScreen(),
       _buildAttendanceTab(),
       _buildNotificationsTab(),
     ];

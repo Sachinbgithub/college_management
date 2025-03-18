@@ -1,6 +1,8 @@
 import 'package:college_management/admin/manage_user.dart';
+import 'package:college_management/admin/utimetable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../staff/view_timetable.dart';
 import 'faculty_verify.dart';
 import 'notify.dart';
 
@@ -60,8 +62,8 @@ class _AdminPanelState extends State<AdminPanel> {
             ),
             ListTile(
               leading: Icon(Icons.message),
-              title: Text("Send Message"),
-              onTap: () => _navigateToScreen(context, AdminMessageScreen()),
+              title: Text("Update TimeTable"),
+              onTap: () => _navigateToScreen(context, AdminTimetableScreen()),
             ),
             ListTile(
               leading: Icon(Icons.notifications),
@@ -83,7 +85,7 @@ class _AdminPanelState extends State<AdminPanel> {
           children: [
             _animatedButton(context, "Manage Users", Icons.people, Colors.blue, ManageUsersScreen()),
             SizedBox(height: 20),
-            _animatedButton(context, "Send Message", Icons.message, Colors.green, AdminMessageScreen()),
+            _animatedButton(context, "Update TimeTable", Icons.message, Colors.green, AdminTimetableScreen()),
             SizedBox(height: 20),
             _animatedButton(context, "Send Notification", Icons.notifications, Colors.orange, AdminMessageScreen()),
             SizedBox(height: 20),

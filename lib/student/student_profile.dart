@@ -2,19 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class StudentProfile extends StatefulWidget {
-  const StudentProfile({super.key, required String studentId});
+class StaffProfile extends StatefulWidget {
+  final String studentId; // Added studentId as a required parameter
+
+  const StaffProfile({Key? key, required this.studentId}) : super(key: key);
 
   @override
-  State<StudentProfile> createState() => _ProfilePageState();
+  State<StaffProfile> createState() => _StaffProfileState();
 }
 
-class _ProfilePageState extends State<StudentProfile> {
-  final TextEditingController _nameController = TextEditingController();
-  final bool _isEditing = false;
-  final bool _isLoading = false;
-  final int _selectedProfileIndex = 0;
-
+class _StaffProfileState extends State<StaffProfile> {
   final List<String> profilePictures = [
     'assets/profile/img.png',
     'assets/profile/img_1.png',
@@ -24,11 +21,7 @@ class _ProfilePageState extends State<StudentProfile> {
     'assets/profile/img_5.png',
   ];
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    super.dispose();
-  }
+  int _selectedProfileIndex = 0;
 
   Future<Map<String, dynamic>?> _getUserData() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -36,17 +29,29 @@ class _ProfilePageState extends State<StudentProfile> {
       final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
       return doc.data();
     }
-    return {'name': 'Guest', 'email': 'No Email', 'profilePictureIndex': 0, 'rewardPoints': 0, 'dailyStreak': 0, 'dailyQuizScores': []};
+    return {'name': 'Guest', 'email': 'No Email', 'profilePictureIndex': 0};
+  }
+
+  void _updateProfilePicture(int index) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+        'profilePictureIndex': index,
+      });
+      setState(() {
+        _selectedProfileIndex = index;
+      });
+    }
   }
 
   Widget _buildProfileHeader(Map<String, dynamic> userData) {
-    _nameController.text = userData['name'] ?? 'Guest';
+    _selectedProfileIndex = userData['profilePictureIndex'] ?? 0;
 
     return Column(
       children: [
         CircleAvatar(
           radius: 50,
-          backgroundImage: AssetImage(profilePictures[userData['profilePictureIndex'] ?? 0]),
+          backgroundImage: AssetImage(profilePictures[_selectedProfileIndex]),
         ),
         const SizedBox(height: 16),
         Text(
@@ -62,17 +67,64 @@ class _ProfilePageState extends State<StudentProfile> {
     );
   }
 
-  Widget _buildStats(Map<String, dynamic> userData) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  Widget _buildStaffCard(Map<String, dynamic> userData) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _StatCard(title: 'Reward Points', value: userData['rewardPoints']?.toString() ?? '0', icon: Icons.star),
-            _StatCard(title: 'Daily Streak', value: userData['dailyStreak']?.toString() ?? '0', icon: Icons.local_fire_department),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Staff Profile",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    "Staff",
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text("Name: ${userData['name'] ?? 'Guest'}", style: const TextStyle(fontSize: 16)),
+            Text("Email: ${userData['email'] ?? 'No Email'}", style: const TextStyle(fontSize: 16)),
           ],
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildAvatarSelection() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: List.generate(profilePictures.length, (index) {
+          return GestureDetector(
+            onTap: () => _updateProfilePicture(index),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: CircleAvatar(
+                radius: 30,
+                backgroundImage: AssetImage(profilePictures[index]),
+                child: _selectedProfileIndex == index
+                    ? const Icon(Icons.check_circle, color: Colors.green, size: 30)
+                    : null,
+              ),
+            ),
+          );
+        }),
+      ),
     );
   }
 
@@ -81,7 +133,7 @@ class _ProfilePageState extends State<StudentProfile> {
     return Scaffold(
       backgroundColor: Colors.blue[50],
       appBar: AppBar(title: const Text('Profile'), backgroundColor: Colors.blue[50]),
-      body: FutureBuilder<Map<String, dynamic>?> (
+      body: FutureBuilder<Map<String, dynamic>?>(
         future: _getUserData(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -95,7 +147,10 @@ class _ProfilePageState extends State<StudentProfile> {
                 children: [
                   _buildProfileHeader(userData),
                   const SizedBox(height: 24),
-                  _buildStats(userData),
+                  _buildStaffCard(userData),
+                  const SizedBox(height: 24),
+                  const Text("Select Avatar", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  _buildAvatarSelection(),
                 ],
               ),
             ),
@@ -106,56 +161,28 @@ class _ProfilePageState extends State<StudentProfile> {
   }
 }
 
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-
-  const _StatCard({required this.title, required this.value, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        child: Column(
-          children: [
-            Icon(icon, size: 32, color: Theme.of(context).primaryColor),
-            const SizedBox(height: 8),
-            Text(title, style: const TextStyle(fontSize: 14, color: Colors.grey)),
-            const SizedBox(height: 4),
-            Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 
 
 
 
-// // currently in use
 // import 'package:flutter/material.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 //
-// class student_profile extends StatefulWidget {
-//   const student_profile({super.key});
+// class StudentProfile extends StatefulWidget {
+//   const StudentProfile({super.key, required String studentId});
 //
 //   @override
-//   State<student_profile> createState() => _ProfilePageState();
+//   State<StudentProfile> createState() => _ProfilePageState();
 // }
 //
-// class _ProfilePageState extends State<student_profile> {
+// class _ProfilePageState extends State<StudentProfile> {
 //   final TextEditingController _nameController = TextEditingController();
-//   bool _isEditing = false;
-//   bool _isLoading = false;
-//   int _selectedProfileIndex = 0;
+//   final bool _isEditing = false;
+//   final bool _isLoading = false;
+//   final int _selectedProfileIndex = 0;
 //
-//   // List of profile pictures from assets
 //   final List<String> profilePictures = [
 //     'assets/profile/img.png',
 //     'assets/profile/img_1.png',
@@ -163,7 +190,6 @@ class _StatCard extends StatelessWidget {
 //     'assets/profile/img_3.png',
 //     'assets/profile/img_4.png',
 //     'assets/profile/img_5.png',
-//     // Add more profile picture paths as needed
 //   ];
 //
 //   @override
@@ -175,268 +201,44 @@ class _StatCard extends StatelessWidget {
 //   Future<Map<String, dynamic>?> _getUserData() async {
 //     final user = FirebaseAuth.instance.currentUser;
 //     if (user != null) {
-//       final doc = await FirebaseFirestore.instance
-//           .collection('users')
-//           .doc(user.uid)
-//           .get();
+//       final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
 //       return doc.data();
 //     }
-//     return null;
-//   }
-//
-//   Future<void> _updateUsername() async {
-//     if (_nameController.text.trim().isEmpty) return;
-//
-//     setState(() => _isLoading = true);
-//     try {
-//       final user = FirebaseAuth.instance.currentUser;
-//       if (user != null) {
-//         await FirebaseFirestore.instance
-//             .collection('users')
-//             .doc(user.uid)
-//             .update({'name': _nameController.text.trim()});
-//
-//         setState(() => _isEditing = false);
-//         if (mounted) {
-//           ScaffoldMessenger.of(context).showSnackBar(
-//             const SnackBar(content: Text('Username updated successfully')),
-//           );
-//         }
-//       }
-//     } catch (e) {
-//       if (mounted) {
-//         ScaffoldMessenger.of(context).showSnackBar(
-//           SnackBar(content: Text('Error updating username: $e')),
-//         );
-//       }
-//     } finally {
-//       setState(() => _isLoading = false);
-//     }
-//   }
-//
-//   Future<void> _updateProfilePicture(int index) async {
-//     setState(() => _isLoading = true);
-//     try {
-//       final user = FirebaseAuth.instance.currentUser;
-//       if (user != null) {
-//         await FirebaseFirestore.instance
-//             .collection('users')
-//             .doc(user.uid)
-//             .update({'profilePictureIndex': index});
-//
-//         setState(() => _selectedProfileIndex = index);
-//         if (mounted) {
-//           Navigator.pop(context); // Close the dialog
-//           ScaffoldMessenger.of(context).showSnackBar(
-//             const SnackBar(content: Text('Profile picture updated successfully')),
-//           );
-//         }
-//       }
-//     } catch (e) {
-//       if (mounted) {
-//         ScaffoldMessenger.of(context).showSnackBar(
-//           SnackBar(content: Text('Error updating profile picture: $e')),
-//         );
-//       }
-//     } finally {
-//       setState(() => _isLoading = false);
-//     }
-//   }
-//
-//   void _showProfilePictureSelector() {
-//     showDialog(
-//       context: context,
-//       builder: (context) => Dialog(
-//         child: Padding(
-//           padding: const EdgeInsets.all(16.0),
-//           child: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             children: [
-//               const Text(
-//                 'Select Profile Picture',
-//                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//               ),
-//               const SizedBox(height: 16),
-//               GridView.builder(
-//                 shrinkWrap: true,
-//                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-//                   crossAxisCount: 3,
-//                   crossAxisSpacing: 8,
-//                   mainAxisSpacing: 8,
-//                 ),
-//                 itemCount: profilePictures.length,
-//                 itemBuilder: (context, index) => GestureDetector(
-//                   onTap: () => _updateProfilePicture(index),
-//                   child: CircleAvatar(
-//                     radius: 30,
-//                     backgroundImage: AssetImage(profilePictures[index]),
-//                     child: _selectedProfileIndex == index
-//                         ? const Icon(Icons.check, color: Colors.white)
-//                         : null,
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-//
-//   Widget _buildProfileImage(Map<String, dynamic> userData) {
-//     final profileIndex = userData['profilePictureIndex'] ?? 0;
-//     return Stack(
-//       children: [
-//         CircleAvatar(
-//           radius: 50,
-//           backgroundImage: AssetImage(profilePictures[profileIndex]),
-//         ),
-//         Positioned(
-//           bottom: 0,
-//           right: 0,
-//           child: GestureDetector(
-//             onTap: _isLoading ? null : _showProfilePictureSelector,
-//             child: Container(
-//               padding: const EdgeInsets.all(8),
-//               decoration: BoxDecoration(
-//                 color: Colors.blue,
-//                 shape: BoxShape.circle,
-//                 border: Border.all(color: Colors.white, width: 2),
-//               ),
-//               child: _isLoading
-//                   ? const SizedBox(
-//                 width: 16,
-//                 height: 16,
-//                 child: CircularProgressIndicator(
-//                   strokeWidth: 2,
-//                   color: Colors.white,
-//                 ),
-//               )
-//                   : const Icon(
-//                 Icons.camera_alt,
-//                 size: 16,
-//                 color: Colors.white,
-//               ),
-//             ),
-//           ),
-//         ),
-//       ],
-//     );
+//     return {'name': 'Guest', 'email': 'No Email', 'profilePictureIndex': 0, 'rewardPoints': 0, 'dailyStreak': 0, 'dailyQuizScores': []};
 //   }
 //
 //   Widget _buildProfileHeader(Map<String, dynamic> userData) {
-//     if (!_isEditing) {
-//       _nameController.text = userData['name'] ?? '';
-//     }
+//     _nameController.text = userData['name'] ?? 'Guest';
 //
 //     return Column(
 //       children: [
-//         _buildProfileImage(userData),
+//         CircleAvatar(
+//           radius: 50,
+//           backgroundImage: AssetImage(profilePictures[userData['profilePictureIndex'] ?? 0]),
+//         ),
 //         const SizedBox(height: 16),
-//         _isEditing
-//             ? Row(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: [
-//             SizedBox(
-//               width: 200,
-//               child: TextField(
-//                 controller: _nameController,
-//                 decoration: const InputDecoration(
-//                   labelText: 'Username',
-//                 ),
-//               ),
-//             ),
-//             IconButton(
-//               icon: const Icon(Icons.check),
-//               onPressed: _updateUsername,
-//             ),
-//             IconButton(
-//               icon: const Icon(Icons.close),
-//               onPressed: () => setState(() => _isEditing = false),
-//             ),
-//           ],
-//         )
-//             : Row(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: [
-//             Text(
-//               userData['name'] ?? 'No Name',
-//               style: const TextStyle(
-//                 fontSize: 24,
-//                 fontWeight: FontWeight.bold,
-//               ),
-//             ),
-//             IconButton(
-//               icon: const Icon(Icons.edit),
-//               onPressed: () => setState(() => _isEditing = true),
-//             ),
-//           ],
+//         Text(
+//           userData['name'] ?? 'Guest',
+//           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
 //         ),
 //         const SizedBox(height: 8),
 //         Text(
 //           userData['email'] ?? 'No Email',
-//           style: const TextStyle(
-//             fontSize: 16,
-//             color: Colors.grey,
-//           ),
+//           style: const TextStyle(fontSize: 16, color: Colors.grey),
 //         ),
 //       ],
 //     );
 //   }
 //
 //   Widget _buildStats(Map<String, dynamic> userData) {
-//     final List<Map<String, dynamic>> dailyQuizScores =
-//     List<Map<String, dynamic>>.from(userData['dailyQuizScores'] ?? []);
-//     dailyQuizScores.sort((a, b) => b['date'].compareTo(a['date']));
-//
 //     return Column(
 //       children: [
 //         Row(
 //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 //           children: [
-//             _StatCard(
-//               title: 'Reward Points',
-//               value: userData['rewardPoints']?.toString() ?? '0',
-//               icon: Icons.star,
-//             ),
-//             // _StatCard(
-//             //   title: 'Daily Quiz Points',
-//             //   value: userData['totalQuizPoints']?.toString() ?? '0',
-//             //   icon: Icons.star,
-//             // ),
-//             _StatCard(
-//               title: 'Daily Streak',
-//               value: userData['dailyStreak']?.toString() ?? '0',
-//               icon: Icons.local_fire_department,
-//             ),
+//             _StatCard(title: 'Reward Points', value: userData['rewardPoints']?.toString() ?? '0', icon: Icons.star),
+//             _StatCard(title: 'Daily Streak', value: userData['dailyStreak']?.toString() ?? '0', icon: Icons.local_fire_department),
 //           ],
-//         ),
-//         const SizedBox(height: 24),
-//         const Text(
-//           'Daily Quiz History',
-//           style: TextStyle(
-//             fontSize: 20,
-//             fontWeight: FontWeight.bold,
-//           ),
-//         ),
-//         const SizedBox(height: 16),
-//         Card(
-//           child: ListView.builder(
-//             shrinkWrap: true,
-//             physics: const NeverScrollableScrollPhysics(),
-//             itemCount: dailyQuizScores.take(7).length,
-//             itemBuilder: (context, index) {
-//               final score = dailyQuizScores[index];
-//               return ListTile(
-//                 leading: const Icon(Icons.add_task_outlined),
-//                 title: Text('Score: ${score['score']}/10'),
-//                 subtitle: Text('Date: ${score['date']}'),
-//                 trailing: score['score'] >= 7
-//                     ? const Icon(Icons.emoji_events, color: Colors.amber)
-//                     : null,
-//               );
-//             },
-//           ),
 //         ),
 //       ],
 //     );
@@ -446,60 +248,14 @@ class _StatCard extends StatelessWidget {
 //   Widget build(BuildContext context) {
 //     return Scaffold(
 //       backgroundColor: Colors.blue[50],
-//       appBar: AppBar(
-//         title: const Text('Profile'),
-//         backgroundColor: Colors.blue[50],
-//         actions: [
-//           IconButton(
-//             icon: const Icon(Icons.logout),
-//             onPressed: () async {
-//               await FirebaseAuth.instance.signOut();
-//               if (mounted) {
-//                 Navigator.pushNamedAndRemoveUntil(
-//                     context, '/login', (route) => false);
-//               }
-//             },
-//           ),
-//         ],
-//       ),
-//       body: FutureBuilder<Map<String, dynamic>?>(
+//       appBar: AppBar(title: const Text('Profile'), backgroundColor: Colors.blue[50]),
+//       body: FutureBuilder<Map<String, dynamic>?> (
 //         future: _getUserData(),
 //         builder: (context, snapshot) {
 //           if (snapshot.connectionState == ConnectionState.waiting) {
 //             return const Center(child: CircularProgressIndicator());
 //           }
-//
-//           if (snapshot.hasError) {
-//             return Center(child: Text('Error: ${snapshot.error}'));
-//           }
-//
-//           if (!snapshot.hasData) {
-//             return Center(
-//               child:  Column(
-//                 children: [
-//                   const Center(child: Text('No user data found'),
-//                   ),
-//                   const SizedBox(height: 20,),
-//                   const Text("Login for profile access!"),
-//                   Center(
-//                     child:IconButton(
-//                       icon: const Icon(Icons.login),
-//                       onPressed: () async {
-//                         await FirebaseAuth.instance.signOut();
-//                         if (mounted) {
-//                           Navigator.pushNamedAndRemoveUntil(
-//                               context, '/login', (route) => false);
-//                         }
-//                       },
-//                     ),
-//                   )
-//                 ],
-//               ),
-//             );
-//
-//           }
-//
-//           final userData = snapshot.data!;
+//           final userData = snapshot.data ?? {};
 //           return SingleChildScrollView(
 //             child: Padding(
 //               padding: const EdgeInsets.all(16.0),
@@ -523,11 +279,7 @@ class _StatCard extends StatelessWidget {
 //   final String value;
 //   final IconData icon;
 //
-//   const _StatCard({
-//     required this.title,
-//     required this.value,
-//     required this.icon,
-//   });
+//   const _StatCard({required this.title, required this.value, required this.icon});
 //
 //   @override
 //   Widget build(BuildContext context) {
@@ -539,24 +291,440 @@ class _StatCard extends StatelessWidget {
 //           children: [
 //             Icon(icon, size: 32, color: Theme.of(context).primaryColor),
 //             const SizedBox(height: 8),
-//             Text(
-//               title,
-//               style: const TextStyle(
-//                 fontSize: 14,
-//                 color: Colors.grey,
-//               ),
-//             ),
+//             Text(title, style: const TextStyle(fontSize: 14, color: Colors.grey)),
 //             const SizedBox(height: 4),
-//             Text(
-//               value,
-//               style: const TextStyle(
-//                 fontSize: 24,
-//                 fontWeight: FontWeight.bold,
-//               ),
-//             ),
+//             Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
 //           ],
 //         ),
 //       ),
 //     );
 //   }
 // }
+//
+//
+//
+//
+//
+// // // currently in use
+// // import 'package:flutter/material.dart';
+// // import 'package:cloud_firestore/cloud_firestore.dart';
+// // import 'package:firebase_auth/firebase_auth.dart';
+// //
+// // class student_profile extends StatefulWidget {
+// //   const student_profile({super.key});
+// //
+// //   @override
+// //   State<student_profile> createState() => _ProfilePageState();
+// // }
+// //
+// // class _ProfilePageState extends State<student_profile> {
+// //   final TextEditingController _nameController = TextEditingController();
+// //   bool _isEditing = false;
+// //   bool _isLoading = false;
+// //   int _selectedProfileIndex = 0;
+// //
+// //   // List of profile pictures from assets
+// //   final List<String> profilePictures = [
+// //     'assets/profile/img.png',
+// //     'assets/profile/img_1.png',
+// //     'assets/profile/img_2.png',
+// //     'assets/profile/img_3.png',
+// //     'assets/profile/img_4.png',
+// //     'assets/profile/img_5.png',
+// //     // Add more profile picture paths as needed
+// //   ];
+// //
+// //   @override
+// //   void dispose() {
+// //     _nameController.dispose();
+// //     super.dispose();
+// //   }
+// //
+// //   Future<Map<String, dynamic>?> _getUserData() async {
+// //     final user = FirebaseAuth.instance.currentUser;
+// //     if (user != null) {
+// //       final doc = await FirebaseFirestore.instance
+// //           .collection('users')
+// //           .doc(user.uid)
+// //           .get();
+// //       return doc.data();
+// //     }
+// //     return null;
+// //   }
+// //
+// //   Future<void> _updateUsername() async {
+// //     if (_nameController.text.trim().isEmpty) return;
+// //
+// //     setState(() => _isLoading = true);
+// //     try {
+// //       final user = FirebaseAuth.instance.currentUser;
+// //       if (user != null) {
+// //         await FirebaseFirestore.instance
+// //             .collection('users')
+// //             .doc(user.uid)
+// //             .update({'name': _nameController.text.trim()});
+// //
+// //         setState(() => _isEditing = false);
+// //         if (mounted) {
+// //           ScaffoldMessenger.of(context).showSnackBar(
+// //             const SnackBar(content: Text('Username updated successfully')),
+// //           );
+// //         }
+// //       }
+// //     } catch (e) {
+// //       if (mounted) {
+// //         ScaffoldMessenger.of(context).showSnackBar(
+// //           SnackBar(content: Text('Error updating username: $e')),
+// //         );
+// //       }
+// //     } finally {
+// //       setState(() => _isLoading = false);
+// //     }
+// //   }
+// //
+// //   Future<void> _updateProfilePicture(int index) async {
+// //     setState(() => _isLoading = true);
+// //     try {
+// //       final user = FirebaseAuth.instance.currentUser;
+// //       if (user != null) {
+// //         await FirebaseFirestore.instance
+// //             .collection('users')
+// //             .doc(user.uid)
+// //             .update({'profilePictureIndex': index});
+// //
+// //         setState(() => _selectedProfileIndex = index);
+// //         if (mounted) {
+// //           Navigator.pop(context); // Close the dialog
+// //           ScaffoldMessenger.of(context).showSnackBar(
+// //             const SnackBar(content: Text('Profile picture updated successfully')),
+// //           );
+// //         }
+// //       }
+// //     } catch (e) {
+// //       if (mounted) {
+// //         ScaffoldMessenger.of(context).showSnackBar(
+// //           SnackBar(content: Text('Error updating profile picture: $e')),
+// //         );
+// //       }
+// //     } finally {
+// //       setState(() => _isLoading = false);
+// //     }
+// //   }
+// //
+// //   void _showProfilePictureSelector() {
+// //     showDialog(
+// //       context: context,
+// //       builder: (context) => Dialog(
+// //         child: Padding(
+// //           padding: const EdgeInsets.all(16.0),
+// //           child: Column(
+// //             mainAxisSize: MainAxisSize.min,
+// //             children: [
+// //               const Text(
+// //                 'Select Profile Picture',
+// //                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+// //               ),
+// //               const SizedBox(height: 16),
+// //               GridView.builder(
+// //                 shrinkWrap: true,
+// //                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+// //                   crossAxisCount: 3,
+// //                   crossAxisSpacing: 8,
+// //                   mainAxisSpacing: 8,
+// //                 ),
+// //                 itemCount: profilePictures.length,
+// //                 itemBuilder: (context, index) => GestureDetector(
+// //                   onTap: () => _updateProfilePicture(index),
+// //                   child: CircleAvatar(
+// //                     radius: 30,
+// //                     backgroundImage: AssetImage(profilePictures[index]),
+// //                     child: _selectedProfileIndex == index
+// //                         ? const Icon(Icons.check, color: Colors.white)
+// //                         : null,
+// //                   ),
+// //                 ),
+// //               ),
+// //             ],
+// //           ),
+// //         ),
+// //       ),
+// //     );
+// //   }
+// //
+// //   Widget _buildProfileImage(Map<String, dynamic> userData) {
+// //     final profileIndex = userData['profilePictureIndex'] ?? 0;
+// //     return Stack(
+// //       children: [
+// //         CircleAvatar(
+// //           radius: 50,
+// //           backgroundImage: AssetImage(profilePictures[profileIndex]),
+// //         ),
+// //         Positioned(
+// //           bottom: 0,
+// //           right: 0,
+// //           child: GestureDetector(
+// //             onTap: _isLoading ? null : _showProfilePictureSelector,
+// //             child: Container(
+// //               padding: const EdgeInsets.all(8),
+// //               decoration: BoxDecoration(
+// //                 color: Colors.blue,
+// //                 shape: BoxShape.circle,
+// //                 border: Border.all(color: Colors.white, width: 2),
+// //               ),
+// //               child: _isLoading
+// //                   ? const SizedBox(
+// //                 width: 16,
+// //                 height: 16,
+// //                 child: CircularProgressIndicator(
+// //                   strokeWidth: 2,
+// //                   color: Colors.white,
+// //                 ),
+// //               )
+// //                   : const Icon(
+// //                 Icons.camera_alt,
+// //                 size: 16,
+// //                 color: Colors.white,
+// //               ),
+// //             ),
+// //           ),
+// //         ),
+// //       ],
+// //     );
+// //   }
+// //
+// //   Widget _buildProfileHeader(Map<String, dynamic> userData) {
+// //     if (!_isEditing) {
+// //       _nameController.text = userData['name'] ?? '';
+// //     }
+// //
+// //     return Column(
+// //       children: [
+// //         _buildProfileImage(userData),
+// //         const SizedBox(height: 16),
+// //         _isEditing
+// //             ? Row(
+// //           mainAxisAlignment: MainAxisAlignment.center,
+// //           children: [
+// //             SizedBox(
+// //               width: 200,
+// //               child: TextField(
+// //                 controller: _nameController,
+// //                 decoration: const InputDecoration(
+// //                   labelText: 'Username',
+// //                 ),
+// //               ),
+// //             ),
+// //             IconButton(
+// //               icon: const Icon(Icons.check),
+// //               onPressed: _updateUsername,
+// //             ),
+// //             IconButton(
+// //               icon: const Icon(Icons.close),
+// //               onPressed: () => setState(() => _isEditing = false),
+// //             ),
+// //           ],
+// //         )
+// //             : Row(
+// //           mainAxisAlignment: MainAxisAlignment.center,
+// //           children: [
+// //             Text(
+// //               userData['name'] ?? 'No Name',
+// //               style: const TextStyle(
+// //                 fontSize: 24,
+// //                 fontWeight: FontWeight.bold,
+// //               ),
+// //             ),
+// //             IconButton(
+// //               icon: const Icon(Icons.edit),
+// //               onPressed: () => setState(() => _isEditing = true),
+// //             ),
+// //           ],
+// //         ),
+// //         const SizedBox(height: 8),
+// //         Text(
+// //           userData['email'] ?? 'No Email',
+// //           style: const TextStyle(
+// //             fontSize: 16,
+// //             color: Colors.grey,
+// //           ),
+// //         ),
+// //       ],
+// //     );
+// //   }
+// //
+// //   Widget _buildStats(Map<String, dynamic> userData) {
+// //     final List<Map<String, dynamic>> dailyQuizScores =
+// //     List<Map<String, dynamic>>.from(userData['dailyQuizScores'] ?? []);
+// //     dailyQuizScores.sort((a, b) => b['date'].compareTo(a['date']));
+// //
+// //     return Column(
+// //       children: [
+// //         Row(
+// //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+// //           children: [
+// //             _StatCard(
+// //               title: 'Reward Points',
+// //               value: userData['rewardPoints']?.toString() ?? '0',
+// //               icon: Icons.star,
+// //             ),
+// //             // _StatCard(
+// //             //   title: 'Daily Quiz Points',
+// //             //   value: userData['totalQuizPoints']?.toString() ?? '0',
+// //             //   icon: Icons.star,
+// //             // ),
+// //             _StatCard(
+// //               title: 'Daily Streak',
+// //               value: userData['dailyStreak']?.toString() ?? '0',
+// //               icon: Icons.local_fire_department,
+// //             ),
+// //           ],
+// //         ),
+// //         const SizedBox(height: 24),
+// //         const Text(
+// //           'Daily Quiz History',
+// //           style: TextStyle(
+// //             fontSize: 20,
+// //             fontWeight: FontWeight.bold,
+// //           ),
+// //         ),
+// //         const SizedBox(height: 16),
+// //         Card(
+// //           child: ListView.builder(
+// //             shrinkWrap: true,
+// //             physics: const NeverScrollableScrollPhysics(),
+// //             itemCount: dailyQuizScores.take(7).length,
+// //             itemBuilder: (context, index) {
+// //               final score = dailyQuizScores[index];
+// //               return ListTile(
+// //                 leading: const Icon(Icons.add_task_outlined),
+// //                 title: Text('Score: ${score['score']}/10'),
+// //                 subtitle: Text('Date: ${score['date']}'),
+// //                 trailing: score['score'] >= 7
+// //                     ? const Icon(Icons.emoji_events, color: Colors.amber)
+// //                     : null,
+// //               );
+// //             },
+// //           ),
+// //         ),
+// //       ],
+// //     );
+// //   }
+// //
+// //   @override
+// //   Widget build(BuildContext context) {
+// //     return Scaffold(
+// //       backgroundColor: Colors.blue[50],
+// //       appBar: AppBar(
+// //         title: const Text('Profile'),
+// //         backgroundColor: Colors.blue[50],
+// //         actions: [
+// //           IconButton(
+// //             icon: const Icon(Icons.logout),
+// //             onPressed: () async {
+// //               await FirebaseAuth.instance.signOut();
+// //               if (mounted) {
+// //                 Navigator.pushNamedAndRemoveUntil(
+// //                     context, '/login', (route) => false);
+// //               }
+// //             },
+// //           ),
+// //         ],
+// //       ),
+// //       body: FutureBuilder<Map<String, dynamic>?>(
+// //         future: _getUserData(),
+// //         builder: (context, snapshot) {
+// //           if (snapshot.connectionState == ConnectionState.waiting) {
+// //             return const Center(child: CircularProgressIndicator());
+// //           }
+// //
+// //           if (snapshot.hasError) {
+// //             return Center(child: Text('Error: ${snapshot.error}'));
+// //           }
+// //
+// //           if (!snapshot.hasData) {
+// //             return Center(
+// //               child:  Column(
+// //                 children: [
+// //                   const Center(child: Text('No user data found'),
+// //                   ),
+// //                   const SizedBox(height: 20,),
+// //                   const Text("Login for profile access!"),
+// //                   Center(
+// //                     child:IconButton(
+// //                       icon: const Icon(Icons.login),
+// //                       onPressed: () async {
+// //                         await FirebaseAuth.instance.signOut();
+// //                         if (mounted) {
+// //                           Navigator.pushNamedAndRemoveUntil(
+// //                               context, '/login', (route) => false);
+// //                         }
+// //                       },
+// //                     ),
+// //                   )
+// //                 ],
+// //               ),
+// //             );
+// //
+// //           }
+// //
+// //           final userData = snapshot.data!;
+// //           return SingleChildScrollView(
+// //             child: Padding(
+// //               padding: const EdgeInsets.all(16.0),
+// //               child: Column(
+// //                 children: [
+// //                   _buildProfileHeader(userData),
+// //                   const SizedBox(height: 24),
+// //                   _buildStats(userData),
+// //                 ],
+// //               ),
+// //             ),
+// //           );
+// //         },
+// //       ),
+// //     );
+// //   }
+// // }
+// //
+// // class _StatCard extends StatelessWidget {
+// //   final String title;
+// //   final String value;
+// //   final IconData icon;
+// //
+// //   const _StatCard({
+// //     required this.title,
+// //     required this.value,
+// //     required this.icon,
+// //   });
+// //
+// //   @override
+// //   Widget build(BuildContext context) {
+// //     return Card(
+// //       elevation: 4,
+// //       child: Padding(
+// //         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+// //         child: Column(
+// //           children: [
+// //             Icon(icon, size: 32, color: Theme.of(context).primaryColor),
+// //             const SizedBox(height: 8),
+// //             Text(
+// //               title,
+// //               style: const TextStyle(
+// //                 fontSize: 14,
+// //                 color: Colors.grey,
+// //               ),
+// //             ),
+// //             const SizedBox(height: 4),
+// //             Text(
+// //               value,
+// //               style: const TextStyle(
+// //                 fontSize: 24,
+// //                 fontWeight: FontWeight.bold,
+// //               ),
+// //             ),
+// //           ],
+// //         ),
+// //       ),
+// //     );
+// //   }
+// // }

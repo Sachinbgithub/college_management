@@ -1,13 +1,15 @@
+import 'package:college_management/staff/staff_profile.dart';
 import 'package:college_management/staff/view_attendance.dart';
+import 'package:college_management/staff/view_timetable.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../login/auth_service.dart';
 import '../student/NotificationsScreen.dart';
-import 'attendance.dart';
+
+import '../student/timetablePage.dart';
 import 'mark_attendance.dart';
-import 'notification.dart';
 
 class FacultyDashboard extends StatefulWidget {
   @override
@@ -29,13 +31,17 @@ class _FacultyDashboardState extends State<FacultyDashboard> {
           style: TextStyle(color: Colors.grey[800]),
         ),
         actions: [
-          CircleAvatar(
-            backgroundImage: NetworkImage('profile_picture_url'),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.of(context).pushReplacementNamed('/login');
+            },
           ),
         ],
       ),
       drawer: _buildDrawer(context),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -78,7 +84,7 @@ class _FacultyDashboardState extends State<FacultyDashboard> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ViewProfilePage()),
+                MaterialPageRoute(builder: (context) => StaffProfile()),
               );
             },
           ),
@@ -89,6 +95,16 @@ class _FacultyDashboardState extends State<FacultyDashboard> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => ViewStudentsPage()),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.people),
+            title: Text('View TimeTable'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => StudentScreen()),
               );
             },
           ),
@@ -162,49 +178,62 @@ class _FacultyDashboardState extends State<FacultyDashboard> {
     );
   }
 
-  // Build Quick Actions Card
+  // Redesigned Quick Actions Card with 3 Buttons
   Widget _buildQuickActionsCard() {
     return Card(
-      elevation: 5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      color: Colors.white.withOpacity(0.9), // Soft transparency effect
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Quick Actions',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue[600]),
+            // 🔥 Header with Icon
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Quick Actions',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.blue,
+                  ),
+                ),
+                Icon(Icons.flash_on, color: Colors.blue, size: 24),
+              ],
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 12),
+
+            // 🎯 Action Buttons with Icons
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => AttendancePage()),
-                    );
+                _buildActionButton(
+                  icon: Icons.check_circle_outline,
+                  label: 'Mark Attendance',
+                  color: Colors.green,
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => AttendancePage()));
                   },
-                  child: Text('Mark Attendance'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[600],
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ViewAttendancePage()),
-                    );
+                _buildActionButton(
+                  icon: Icons.visibility,
+                  label: 'View Attendance',
+                  color: Colors.blue,
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => ViewAttendancePage()));
                   },
-                  child: Text('View Attendance'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[600],
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
+                ),
+                _buildActionButton(
+                  icon: Icons.schedule,
+                  label: 'View Timetable',
+                  color: Colors.blue
+                  ,
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => StudentScreen()));
+                  },
                 ),
               ],
             ),
@@ -213,6 +242,32 @@ class _FacultyDashboardState extends State<FacultyDashboard> {
       ),
     );
   }
+
+// Custom Action Button Widget
+  Widget _buildActionButton({required IconData icon, required String label, required Color color, required VoidCallback onTap}) {
+    return Column(
+      children: [
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(50),
+          child: Container(
+            padding: EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 28, color: color),
+          ),
+        ),
+        SizedBox(height: 8),
+        Text(
+          label,
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+        ),
+      ],
+    );
+  }
+
 
   // Build Notifications Card
   Widget _buildNotificationsCard() {
